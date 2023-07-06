@@ -14,6 +14,7 @@ export default class TodoList extends React.Component {
 		this.updateCurrentTask = this.updateCurrentTask.bind(this);
 		this.addTask = this.addTask.bind(this);
 		this.toggleTask = this.toggleTask.bind(this);
+		this.deleteTask = this.deleteTask.bind(this);
 	}
 
 	updateCurrentTask(event) {
@@ -60,6 +61,17 @@ export default class TodoList extends React.Component {
 		);
 	}
 
+	deleteTask(index) {
+		console.log('DELETED!!');
+		this.setState(prevState => {
+			// Filter out the task at the given index
+			const tasks = prevState.tasks.filter(
+				(task, taskIndex) => taskIndex !== index
+			);
+			return { tasks };
+		});
+	}
+
 	render() {
 		return (
 			<div>
@@ -85,6 +97,14 @@ export default class TodoList extends React.Component {
 							}}
 						>
 							{task.text}
+							<button
+								onClick={event => {
+									event.stopPropagation(); // Stop the event from bubbling up to the li
+									this.deleteTask(index);
+								}}
+							>
+								Delete
+							</button>
 						</li>
 					))}
 				</ul>
