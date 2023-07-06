@@ -4,9 +4,10 @@ export default class TodoList extends React.Component {
 	constructor(props) {
 		super(props);
 
-		// Initialize state to store the current task input
+		// Initialize state with currentTask as an empty string and tasks as an empty array
 		this.state = {
 			currentTask: '',
+			tasks: [],
 		};
 
 		// Bind 'this' to our methods
@@ -21,10 +22,15 @@ export default class TodoList extends React.Component {
 	}
 
 	addTask(event) {
-		// Event handler for form submission
+		// Prevent form from refreshing the page
 		event.preventDefault();
-		// For now, just log the current task when the form is submitted
-		console.log(this.state.currentTask);
+		// Add the current task to the tasks array and clear currentTask
+		if (this.state.currentTask !== '') {
+			this.setState(prevState => ({
+				tasks: [...prevState.tasks, this.state.currentTask],
+				currentTask: '',
+			}));
+		}
 	}
 
 	render() {
@@ -41,6 +47,12 @@ export default class TodoList extends React.Component {
 					/>
 					<button type="submit">Add Task</button>
 				</form>
+				{/* List of tasks*/}
+				<ul>
+					{this.state.tasks.map((task, index) => (
+						<li key={index}>{task}</li>
+					))}
+				</ul>
 			</div>
 		);
 	}
