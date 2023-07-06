@@ -4,10 +4,23 @@ export default class TodoList extends React.Component {
 	constructor(props) {
 		super(props);
 
+		let tasks = []; //start with an empty list
+
+		// Try to load from the localStorage
+		const savedTasks = localStorage.getItem('tasks');
+
+		if (savedTasks) {
+			try {
+				tasks = JSON.parse(savedTasks); // Parse the JSON string into an array
+			} catch (e) {
+				console.error('Failed to parse saved tasks:', e); // If parsing fails, log the error and keep the empty list
+			}
+		}
+
 		// Initialize state with currentTask as an empty string and tasks as an empty array
 		this.state = {
 			currentTask: '',
-			tasks: [],
+			tasks: tasks, //either an empty list or whateve is in the localStorage
 		};
 
 		// Bind 'this' to our methods
@@ -28,13 +41,19 @@ export default class TodoList extends React.Component {
 
 		// Add the current task to the tasks array and clear currentTask
 		if (this.state.currentTask !== '') {
-			this.setState(prevState => ({
-				tasks: [
-					...prevState.tasks,
-					{ text: this.state.currentTask, completed: false },
-				],
-				currentTask: '',
-			}));
+			this.setState(
+				prevState => ({
+					tasks: [
+						...prevState.tasks,
+						{ text: this.state.currentTask, completed: false },
+					],
+					currentTask: '',
+				}),
+				() => {
+					// After state update, save the tasks array to localStorage
+					localStorage.setItem('tasks', JSON.stringify(this.state.tasks));
+				}
+			);
 		}
 	}
 
@@ -56,20 +75,27 @@ export default class TodoList extends React.Component {
 				return { tasks };
 			},
 			() => {
-				console.log('After toggle: ', JSON.stringify(this.state.tasks[index]));
+				// After state update, save the tasks array to localStorage
+				localStorage.setItem('tasks', JSON.stringify(this.state.tasks));
 			}
 		);
 	}
 
 	deleteTask(index) {
 		console.log('DELETED!!');
-		this.setState(prevState => {
-			// Filter out the task at the given index
-			const tasks = prevState.tasks.filter(
-				(task, taskIndex) => taskIndex !== index
-			);
-			return { tasks };
-		});
+		this.setState(
+			prevState => {
+				// Filter out the task at the given index
+				const tasks = prevState.tasks.filter(
+					(task, taskIndex) => taskIndex !== index
+				);
+				return { tasks };
+			},
+			() => {
+				// After state update, save the tasks array to localStorage
+				localStorage.setItem('tasks', JSON.stringify(this.state.tasks));
+			}
+		);
 	}
 
 	render() {
