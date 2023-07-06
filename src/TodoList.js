@@ -13,10 +13,10 @@ export default class TodoList extends React.Component {
 		// Bind 'this' to our methods
 		this.updateCurrentTask = this.updateCurrentTask.bind(this);
 		this.addTask = this.addTask.bind(this);
+		this.toggleTask = this.toggleTask.bind(this);
 	}
 
 	updateCurrentTask(event) {
-		// Event handler for input change
 		// Update the currentTask state with the new input
 		this.setState({ currentTask: event.target.value });
 	}
@@ -24,13 +24,40 @@ export default class TodoList extends React.Component {
 	addTask(event) {
 		// Prevent form from refreshing the page
 		event.preventDefault();
+
 		// Add the current task to the tasks array and clear currentTask
 		if (this.state.currentTask !== '') {
 			this.setState(prevState => ({
-				tasks: [...prevState.tasks, this.state.currentTask],
+				tasks: [
+					...prevState.tasks,
+					{ text: this.state.currentTask, completed: false },
+				],
 				currentTask: '',
 			}));
 		}
+	}
+
+	toggleTask(index) {
+		console.log('Before toggle: ', JSON.stringify(this.state.tasks[index]));
+
+		this.setState(
+			prevState => {
+				const tasks = prevState.tasks.map((task, taskIndex) => {
+					if (taskIndex === index) {
+						// This is the task we clicked, so toggle its completed status
+						return { ...task, completed: !task.completed };
+					} else {
+						// This is not the task we clicked, so leave it as is
+						return task;
+					}
+				});
+
+				return { tasks };
+			},
+			() => {
+				console.log('After toggle: ', JSON.stringify(this.state.tasks[index]));
+			}
+		);
 	}
 
 	render() {
@@ -47,10 +74,18 @@ export default class TodoList extends React.Component {
 					/>
 					<button type="submit">Add Task</button>
 				</form>
-				{/* List of tasks*/}
+				{/* List of tasks */}
 				<ul>
 					{this.state.tasks.map((task, index) => (
-						<li key={index}>{task}</li>
+						<li
+							key={index}
+							onClick={() => this.toggleTask(index)}
+							style={{
+								textDecoration: task.completed ? 'line-through' : 'none',
+							}}
+						>
+							{task.text}
+						</li>
 					))}
 				</ul>
 			</div>
