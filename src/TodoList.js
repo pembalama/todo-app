@@ -21,6 +21,7 @@ export default class TodoList extends React.Component {
 		this.state = {
 			currentTask: '',
 			tasks: tasks, //either an empty list or whateve is in the localStorage
+			error: null,
 		};
 
 		// Bind 'this' to our methods
@@ -38,19 +39,20 @@ export default class TodoList extends React.Component {
 	addTask(event) {
 		// Prevent form from refreshing the page
 		event.preventDefault();
+		const task = this.state.currentTask;
 
-		// Add the current task to the tasks array and clear currentTask
-		if (this.state.currentTask !== '') {
+		if (task === '') {
+			this.setState({ error: 'Task cannot be empty.' });
+		} else if (task.length > 100) {
+			this.setState({ error: 'Task cannot be longer than 100 characters.' });
+		} else {
 			this.setState(
 				prevState => ({
-					tasks: [
-						...prevState.tasks,
-						{ text: this.state.currentTask, completed: false },
-					],
+					tasks: [...prevState.tasks, { text: task, completed: false }],
 					currentTask: '',
+					error: null,
 				}),
 				() => {
-					// After state update, save the tasks array to localStorage
 					localStorage.setItem('tasks', JSON.stringify(this.state.tasks));
 				}
 			);
@@ -111,6 +113,8 @@ export default class TodoList extends React.Component {
 						onChange={this.updateCurrentTask}
 					/>
 					<button type="submit">Add Task</button>
+					{/* Display the error message */}
+					{this.state.error && <p>{this.state.error}</p>}
 				</form>
 				{/* List of tasks */}
 				<ul>
