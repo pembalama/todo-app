@@ -22,6 +22,7 @@ export default class TodoList extends React.Component {
 			currentTask: '',
 			tasks: tasks, //either an empty list or whateve is in the localStorage
 			error: null,
+			filter: 'all',
 		};
 
 		// Bind 'this' to our methods
@@ -29,6 +30,7 @@ export default class TodoList extends React.Component {
 		this.addTask = this.addTask.bind(this);
 		this.toggleTask = this.toggleTask.bind(this);
 		this.deleteTask = this.deleteTask.bind(this);
+		this.updateFilter = this.updateFilter.bind(this);
 	}
 
 	updateCurrentTask(event) {
@@ -100,7 +102,30 @@ export default class TodoList extends React.Component {
 		);
 	}
 
+	updateFilter(filter) {
+		this.setState({ filter });
+	}
+
 	render() {
+		// Filter tasks based on the current filter
+		let tasksToRender;
+
+		// Check if any tasks are completed
+		const anyTasksCompleted = this.state.tasks.some(task => task.completed);
+
+		switch (this.state.filter) {
+			case 'completed':
+				tasksToRender = anyTasksCompleted
+					? this.state.tasks.filter(task => task.completed)
+					: this.state.tasks;
+				break;
+			case 'incomplete':
+				tasksToRender = this.state.tasks.filter(task => !task.completed);
+				break;
+			default:
+				tasksToRender = this.state.tasks;
+		}
+
 		return (
 			<div>
 				<h1>Welcome to the ToDo List</h1>
@@ -116,9 +141,20 @@ export default class TodoList extends React.Component {
 					{/* Display the error message */}
 					{this.state.error && <p>{this.state.error}</p>}
 				</form>
+				{/* Buttons for changing filter*/}
+				<div>
+					<button onClick={() => this.updateFilter('all')}>All</button>
+					<button onClick={() => this.updateFilter('completed')}>
+						Completed
+					</button>
+					<button onClick={() => this.updateFilter('incomplete')}>
+						Incomplete
+					</button>
+				</div>
+
 				{/* List of tasks */}
 				<ul>
-					{this.state.tasks.map((task, index) => (
+					{tasksToRender.map((task, index) => (
 						<li
 							key={index}
 							onClick={() => this.toggleTask(index)}
