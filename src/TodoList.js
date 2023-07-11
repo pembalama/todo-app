@@ -4,25 +4,27 @@ export default class TodoList extends React.Component {
 	constructor(props) {
 		super(props);
 
-		let tasks = []; //start with an empty list
+		let tasks = []; // Initialize an empty task array
 
-		// Try to load from the localStorage
+		// Try to get the tasks from localStorage
 		const savedTasks = localStorage.getItem('tasks');
 
+		// If tasks exist in localStorage, try to parse them
 		if (savedTasks) {
 			try {
-				tasks = JSON.parse(savedTasks); // Parse the JSON string into an array
+				tasks = JSON.parse(savedTasks); // Parse the saved tasks
 			} catch (e) {
-				console.error('Failed to parse saved tasks:', e); // If parsing fails, log the error and keep the empty list
+				console.error('Failed to parse saved tasks:', e); // Log an error if parsing failed
 			}
 		}
 
-		// Initialize state with currentTask as an empty string and tasks as an empty array
+		// Initialize the state
 		this.state = {
-			currentTask: '',
-			tasks: tasks, //either an empty list or whateve is in the localStorage
-			error: null,
-			filter: 'all',
+			currentTask: '', // Current task is initially an empty string
+			tasks: tasks, // Tasks are either the parsed tasks from localStorage or an empty array
+			error: null, // No error initially
+			filter: 'all', // Show all tasks initially
+			searchTerm: '', // Search term is initially an empty string
 		};
 
 		// Bind 'this' to our methods
@@ -31,6 +33,7 @@ export default class TodoList extends React.Component {
 		this.toggleTask = this.toggleTask.bind(this);
 		this.deleteTask = this.deleteTask.bind(this);
 		this.updateFilter = this.updateFilter.bind(this);
+		this.updateSearchTerm = this.updateSearchTerm.bind(this);
 	}
 
 	updateCurrentTask(event) {
@@ -39,10 +42,11 @@ export default class TodoList extends React.Component {
 	}
 
 	addTask(event) {
-		// Prevent form from refreshing the page
+		// Prevent form from refreshing the page on submit
 		event.preventDefault();
 		const task = this.state.currentTask;
 
+		// Check the length of the task before adding it
 		if (task === '') {
 			this.setState({ error: 'Task cannot be empty.' });
 		} else if (task.length > 100) {
@@ -50,24 +54,28 @@ export default class TodoList extends React.Component {
 		} else {
 			this.setState(
 				prevState => ({
-					tasks: [...prevState.tasks, { text: task, completed: false }],
-					currentTask: '',
-					error: null,
+					// Add the new task to the tasks array
+					tasks: [
+						...prevState.tasks,
+						{ id: Date.now(), text: task, completed: false },
+					],
+					currentTask: '', // Clear the currentTask input
+					error: null, // Clear any errors
 				}),
 				() => {
+					// After state update, save the tasks array to localStorage
 					localStorage.setItem('tasks', JSON.stringify(this.state.tasks));
 				}
 			);
 		}
 	}
 
-	toggleTask(index) {
-		console.log('Before toggle: ', JSON.stringify(this.state.tasks[index]));
-
+	toggleTask(id) {
+		// Toggle the completed status of the task with the given id
 		this.setState(
 			prevState => {
-				const tasks = prevState.tasks.map((task, taskIndex) => {
-					if (taskIndex === index) {
+				const tasks = prevState.tasks.map(task => {
+					if (task.id === id) {
 						// This is the task we clicked, so toggle its completed status
 						return { ...task, completed: !task.completed };
 					} else {
@@ -76,7 +84,7 @@ export default class TodoList extends React.Component {
 					}
 				});
 
-				return { tasks };
+				return { tasks }; // Update the tasks array in the state
 			},
 			() => {
 				// After state update, save the tasks array to localStorage
@@ -85,15 +93,13 @@ export default class TodoList extends React.Component {
 		);
 	}
 
-	deleteTask(index) {
-		console.log('DELETED!!');
+	deleteTask(id) {
+		// Delete the task with the given id
 		this.setState(
 			prevState => {
-				// Filter out the task at the given index
-				const tasks = prevState.tasks.filter(
-					(task, taskIndex) => taskIndex !== index
-				);
-				return { tasks };
+				const tasks = prevState.tasks.filter(task => task.id !== id); // Filter out the task to be deleted
+
+				return { tasks }; // Update the tasks array in the state
 			},
 			() => {
 				// After state update, save the tasks array to localStorage
@@ -103,27 +109,38 @@ export default class TodoList extends React.Component {
 	}
 
 	updateFilter(filter) {
+		// Update the filter state with the new filter
 		this.setState({ filter });
 	}
 
-	render() {
-		// Filter tasks based on the current filter
-		let tasksToRender;
+	updateSearchTerm(event) {
+		// Update the searchTerm state with the new input
+		this.setState({ searchTerm: event.target.value });
+	}
 
-		// Check if any tasks are completed
-		const anyTasksCompleted = this.state.tasks.some(task => task.completed);
+	render() {
+		// Copy the tasks array from the state
+		let tasksToRender = [...this.state.tasks];
+
+		if (this.state.searchTerm) {
+			// Filter tasks based on the search term
+			tasksToRender = tasksToRender.filter(task =>
+				task.text.toLowerCase().includes(this.state.searchTerm.toLowerCase())
+			);
+		}
 
 		switch (this.state.filter) {
 			case 'completed':
-				tasksToRender = anyTasksCompleted
-					? this.state.tasks.filter(task => task.completed)
-					: this.state.tasks;
+				// Filter tasks to only completed ones
+				tasksToRender = tasksToRender.filter(task => task.completed);
 				break;
 			case 'incomplete':
-				tasksToRender = this.state.tasks.filter(task => !task.completed);
+				// Filter tasks to only incomplete ones
+				tasksToRender = tasksToRender.filter(task => !task.completed);
 				break;
 			default:
-				tasksToRender = this.state.tasks;
+				// By default show all tasks
+				break;
 		}
 
 		return (
@@ -153,11 +170,17 @@ export default class TodoList extends React.Component {
 				</div>
 
 				{/* List of tasks */}
+				<input
+					type="text"
+					placeholder="Search tasks"
+					value={this.state.searchTerm}
+					onChange={this.updateSearchTerm}
+				/>
 				<ul>
-					{tasksToRender.map((task, index) => (
+					{tasksToRender.map(task => (
 						<li
-							key={index}
-							onClick={() => this.toggleTask(index)}
+							key={task.id}
+							onClick={() => this.toggleTask(task.id)}
 							style={{
 								textDecoration: task.completed ? 'line-through' : 'none',
 							}}
@@ -166,7 +189,7 @@ export default class TodoList extends React.Component {
 							<button
 								onClick={event => {
 									event.stopPropagation(); // Stop the event from bubbling up to the li
-									this.deleteTask(index);
+									this.deleteTask(task.id);
 								}}
 							>
 								Delete
