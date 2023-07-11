@@ -34,6 +34,7 @@ export default class TodoList extends React.Component {
 		this.deleteTask = this.deleteTask.bind(this);
 		this.updateFilter = this.updateFilter.bind(this);
 		this.updateSearchTerm = this.updateSearchTerm.bind(this);
+		this.clearTasks = this.clearTasks.bind(this);
 	}
 
 	updateCurrentTask(event) {
@@ -118,6 +119,16 @@ export default class TodoList extends React.Component {
 		this.setState({ searchTerm: event.target.value });
 	}
 
+	clearTasks() {
+		//Check if user confirms deletion of all tasks
+		if (window.confirm('Are you sure you want to delete all tasks?')) {
+			// If confirmed, set tasks array to an empty array and remove from localStorage
+			this.setState({ tasks: [] }, () => {
+				localStorage.removeItem('tasks');
+			});
+		}
+	}
+
 	render() {
 		// Copy the tasks array from the state
 		let tasksToRender = [...this.state.tasks];
@@ -155,16 +166,36 @@ export default class TodoList extends React.Component {
 						onChange={this.updateCurrentTask}
 					/>
 					<button type="submit">Add Task</button>
+					<button type="button" onClick={this.clearTasks}>
+						Clear All Tasks
+					</button>
 					{/* Display the error message */}
 					{this.state.error && <p>{this.state.error}</p>}
 				</form>
 				{/* Buttons for changing filter*/}
 				<div>
-					<button onClick={() => this.updateFilter('all')}>All</button>
-					<button onClick={() => this.updateFilter('completed')}>
+					<button
+						onClick={event => {
+							event.stopPropagation();
+							this.updateFilter('all');
+						}}
+					>
+						All
+					</button>
+					<button
+						onClick={event => {
+							event.stopPropagation();
+							this.updateFilter('completed');
+						}}
+					>
 						Completed
 					</button>
-					<button onClick={() => this.updateFilter('incomplete')}>
+					<button
+						onClick={event => {
+							event.stopPropagation();
+							this.updateFilter('incomplete');
+						}}
+					>
 						Incomplete
 					</button>
 				</div>
