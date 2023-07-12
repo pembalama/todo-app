@@ -25,6 +25,7 @@ export default class TodoList extends React.Component {
 			error: null, // No error initially
 			filter: 'all', // Show all tasks initially
 			searchTerm: '', // Search term is initially an empty string
+			editingText: '', // Current editing task text is initially an empty string
 		};
 
 		// Bind 'this' to our methods
@@ -35,6 +36,7 @@ export default class TodoList extends React.Component {
 		this.updateFilter = this.updateFilter.bind(this);
 		this.updateSearchTerm = this.updateSearchTerm.bind(this);
 		this.clearTasks = this.clearTasks.bind(this);
+		this.handleEditInputChange = this.handleEditInputChange.bind(this);
 	}
 
 	updateCurrentTask(event) {
@@ -58,7 +60,7 @@ export default class TodoList extends React.Component {
 					// Add the new task to the tasks array
 					tasks: [
 						...prevState.tasks,
-						{ id: Date.now(), text: task, completed: false },
+						{ id: Date.now(), text: task, completed: false, isEditing: false },
 					],
 					currentTask: '', // Clear the currentTask input
 					error: null, // Clear any errors
@@ -141,6 +143,36 @@ export default class TodoList extends React.Component {
 			completed: completedTasksCount,
 			incomplete: incompleteTasksCount,
 		};
+	}
+
+	handleEditInputChange(event) {
+		this.setState({ editingText: event.target.value });
+	}
+
+	handleEdit(id) {
+		const task = this.state.tasks.find(task => task.id === id);
+		this.setState({
+			editingText: task.text,
+			tasks: this.state.tasks.map(task =>
+				task.id === id ? { ...task, isEditing: true } : task
+			),
+		});
+	}
+
+	handleUpdateTask(id) {
+		this.setState(
+			prevState => ({
+				tasks: prevState.tasks.map(task =>
+					task.id === id
+						? { ...task, text: this.state.editingText, isEditing: false }
+						: task
+				),
+				editingText: '', // Reset the editingText
+			}),
+			() => {
+				localStorage.setItem('tasks', JSON.stringify(this.state.tasks));
+			}
+		);
 	}
 
 	render() {
@@ -227,19 +259,37 @@ export default class TodoList extends React.Component {
 					{tasksToRender.map(task => (
 						<li
 							key={task.id}
-							onClick={() => this.toggleTask(task.id)}
+							onClick={() => !task.isEditing && this.toggleTask(task.id)}
 							style={{
 								textDecoration: task.completed ? 'line-through' : 'none',
 							}}
 						>
-							{task.text}
+							{task.isEditing ? (
+								<input
+									type="text"
+									value={this.state.editingText}
+									onChange={this.handleEditInputChange}
+								/>
+							) : (
+								task.text
+							)}
 							<button
 								onClick={event => {
-									event.stopPropagation(); // Stop the event from bubbling up to the li
+									event.stopPropagation();
 									this.deleteTask(task.id);
 								}}
 							>
 								Delete
+							</button>
+							<button
+								onClick={event => {
+									event.stopPropagation();
+									task.isEditing
+										? this.handleUpdateTask(task.id)
+										: this.handleEdit(task.id);
+								}}
+							>
+								{task.isEditing ? 'Save' : 'Edit'}
 							</button>
 						</li>
 					))}
