@@ -129,6 +129,20 @@ export default class TodoList extends React.Component {
 		}
 	}
 
+	getTaskCounts() {
+		const allTasksCount = this.state.tasks.length;
+		const completedTasksCount = this.state.tasks.filter(
+			task => task.completed
+		).length;
+		const incompleteTasksCount = allTasksCount - completedTasksCount;
+
+		return {
+			all: allTasksCount,
+			completed: completedTasksCount,
+			incomplete: incompleteTasksCount,
+		};
+	}
+
 	render() {
 		// Copy the tasks array from the state
 		let tasksToRender = [...this.state.tasks];
@@ -153,6 +167,8 @@ export default class TodoList extends React.Component {
 				// By default show all tasks
 				break;
 		}
+
+		const taskCounts = this.getTaskCounts();
 
 		return (
 			<div>
@@ -180,7 +196,7 @@ export default class TodoList extends React.Component {
 							this.updateFilter('all');
 						}}
 					>
-						All
+						All ({taskCounts.all})
 					</button>
 					<button
 						onClick={event => {
@@ -188,7 +204,7 @@ export default class TodoList extends React.Component {
 							this.updateFilter('completed');
 						}}
 					>
-						Completed
+						Completed ({taskCounts.completed})
 					</button>
 					<button
 						onClick={event => {
@@ -196,7 +212,7 @@ export default class TodoList extends React.Component {
 							this.updateFilter('incomplete');
 						}}
 					>
-						Incomplete
+						Incomplete ({taskCounts.incomplete})
 					</button>
 				</div>
 
