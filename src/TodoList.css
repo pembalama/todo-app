@@ -1,0 +1,88 @@
+body {
+    font-family: 'Arial, sans-serif';
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+form input[type="text"] {
+    padding: 10px;
+    border: none;
+    border-bottom: 2px solid #333;
+    width: 75%;
+    margin-right: 5px;
+}
+
+form button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background: #007BFF;
+    color: white;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background: #007BFF;
+    color: white;
+    cursor: pointer;
+    margin-right: 5px;
+    margin-bottom: 10px;
+}
+
+button:hover{
+    background-color: #0056b3;
+}
+
+.searchInput {
+    padding: 10px;
+    border: none;
+    border-bottom: 2px solid #333;
+    width: 75%;
+    margin-bottom: 20px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    
+}
+
+ul li {
+    cursor: pointer;
+    font-size: 20px;
+}
+
+ul li button:first-of-type{
+    margin-left: 25px;
+}
+
+.taskInput {
+    padding: 10px;
+    width: 45%;
+    font-size: 20px;
+}
+
+
+/* Media Query for small devices */
+@media screen and (max-width: 600px) {
+    h1 {
+        font-size: 20px;
+    }
+
+    form button {
+    margin-top: 10px;
+}
+}
+

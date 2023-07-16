@@ -204,7 +204,7 @@ export default class TodoList extends React.Component {
 
 		return (
 			<div>
-				<h1>Welcome to the ToDo List</h1>
+				<h1>ToDo List Tracker</h1>
 				{/* Form for adding new tasks */}
 				<form onSubmit={this.addTask}>
 					<input
@@ -254,6 +254,7 @@ export default class TodoList extends React.Component {
 					placeholder="Search tasks"
 					value={this.state.searchTerm}
 					onChange={this.updateSearchTerm}
+					className="searchInput"
 				/>
 				<ul>
 					{tasksToRender.map(task => (
@@ -269,6 +270,7 @@ export default class TodoList extends React.Component {
 									type="text"
 									value={this.state.editingText}
 									onChange={this.handleEditInputChange}
+									className="taskInput"
 								/>
 							) : (
 								task.text
